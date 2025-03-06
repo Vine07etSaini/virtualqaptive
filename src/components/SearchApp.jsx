@@ -5,32 +5,15 @@ const SearchApp = () => {
   const [selectedSources, setSelectedSources] = useState(["google", "youtube"]);
   const [sortBy, setSortBy] = useState("relevance");
   const [results, setResults] = useState([]);
-  
-  const searchResults = [
-    {
-      title: "Introduction to Machine Learning",
-      snippet: "Comprehensive guide to ML and AI innovations.",
-      source: "youtube",
-      date: "2024-03-15",
-      relevance: 0.92,
-    },
-    {
-      title: "Advanced AI Techniques",
-      snippet: "Latest developments in deep learning architectures...",
-      source: "google",
-      date: "2024-03-14",
-      relevance: 0.88,
-    },
-  ];
-  
-
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault(); 
     console.log("Searching for:", searchQuery);
+    setLoading(true);
     const data = await fetchSearchResults(searchQuery);
-    data = [...data.results.google, data.results.youtube];
-    setResults(data);
+    setLoading(false)
+    setResults([...data.results.google, ...data.results.youtube]);
     // API call can be added here
   };
 
@@ -56,48 +39,54 @@ const SearchApp = () => {
           </form>
         </div>
       </nav>
-
       {/* Filters & Sorting */}
-      <div className="max-w-4xl mx-auto mt-4 p-4 bg-white shadow-md rounded-md">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-600">Filters:</span>
-            {["google", "youtube", "linkedin"].map((source) => (
-              <button
-                key={source}
-                className={`px-3 py-1 rounded-md ${
-                  selectedSources.includes(source)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200"
-                } transition`}
-                onClick={() =>
-                  setSelectedSources((prev) =>
-                    prev.includes(source)
-                      ? prev.filter((s) => s !== source)
-                      : [...prev, source]
-                  )
-                }
-              >
-                {source.charAt(0).toUpperCase() + source.slice(1)}
-              </button>
-            ))}
+      {loading ? (
+        <div className="flex justify-center">
+          <div className="my-[1rem] mx-[-6rem]">
+            <h1 className="text-blue-500 text-xl">It'll take some time.</h1>
           </div>
-
-          {/* Sorting Dropdown */}
-          <select
-            className="p-2 border border-gray-300 rounded-md"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="relevance">Sort by: Relevance</option>
-            <option value="date">Sort by: Date</option>
-            <option value="source">Sort by: Source</option>
-          </select>
+          <div className="w-10 h-10 border-4 border-blue-500 border-dashed rounded-full animate-spin mx-5rem my-[3rem]"></div>
         </div>
-      </div>
+      ) : (
+        <div className="max-w-4xl mx-auto mt-4 p-4 bg-white shadow-md rounded-md">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">Filters:</span>
+              {["google", "youtube", "linkedin"].map((source) => (
+                <button
+                  key={source}
+                  className={`px-3 py-1 rounded-md ${
+                    selectedSources.includes(source)
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  } transition`}
+                  onClick={() =>
+                    setSelectedSources((prev) =>
+                      prev.includes(source)
+                        ? prev.filter((s) => s !== source)
+                        : [...prev, source]
+                    )
+                  }
+                >
+                  {source.charAt(0).toUpperCase() + source.slice(1)}
+                </button>
+              ))}
+            </div>
 
+            {/* Sorting Dropdown */}
+            <select
+              className="p-2 border border-gray-300 rounded-md"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="relevance">Sort by: Relevance</option>
+              <option value="date">Sort by: Date</option>
+              <option value="source">Sort by: Source</option>
+            </select>
+          </div>
+        </div>
+      )}
       {/* Search Results */}
-
       <div className="max-w-5xl mx-auto mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {results.map((result, index) => (
           <div
@@ -123,8 +112,13 @@ const SearchApp = () => {
             <h3 className="text-lg font-semibold mt-2">{result.title}</h3>
             <p className="text-gray-600 text-sm mt-1">{result.snippet}</p>
             <div className="flex justify-between mt-2">
-              <span className="text-xs text-gray-500 overflow-hind">
-                <a href={result.link} target="_blank" rel="noopener noreferrer">
+              <span className="text-xs text-gray-500 truncate">
+                <a
+                  href={result.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate"
+                >
                   {result.link}
                 </a>
               </span>
@@ -134,6 +128,7 @@ const SearchApp = () => {
       </div>
     </div>
   );
+  
 };
 
 export default SearchApp;
